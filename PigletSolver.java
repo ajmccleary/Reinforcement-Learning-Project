@@ -4,6 +4,7 @@ public class PigletSolver {
     double[][][] p;
     boolean[][][] flip;
 
+    // constructor
     PigletSolver(int goal, double epsilon) {
         this.goal = goal;
         this.epsilon = epsilon;
