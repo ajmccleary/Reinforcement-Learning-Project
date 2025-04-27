@@ -32,39 +32,37 @@ public class PigSolver {
      * and the optimal actions (roll or hold) for each state.
      */
     void valueIterate() {
-        double maxChange; //Tracks the maximum change in probabilities during iteration
+        double maxChange; // Tracks the maximum change in probabilities during iteration
         do {
             maxChange = 0.0;
-            //Iterates over all possible states
+            // Iterates over all possible states
             for (int i = 0; i < goal; i++) {
                 for (int j = 0; j < goal; j++) {
                     for (int k = 0; k < goal - i; k++) {
-                        double oldProb = p[i][j][k]; //Stores the old probability for comparison
+                        double oldProb = p[i][j][k]; // Stores the old probability for comparison
 
                         // --- Roll (flip) action ---
                         // Pig-out on rolling a 1: lose turn total, opponent plays with same scores
                         double pigOut = (1.0 / 6) * (1.0 - pWin(j, i, 0));
-                        //Adds the face value to turn total and continue
+                        // Adds the face value to turn total and continue
                         double continueRoll = 0.0;
                         for (int face = 2; face <= 6; face++) {
                             continueRoll += (1.0 / 6) * pWin(i, j, k + face);
                         }
                         double pFlip = pigOut + continueRoll;
 
-                        
-                        //Hold and let the opponent play
+                        // Hold and let the opponent play
                         double pHold = 1.0 - pWin(j, i + k, 0);
 
-                        //Choose the best action either roll or hold 
+                        // Choose the best action either roll or hold
                         p[i][j][k] = Math.max(pFlip, pHold);
                         flip[i][j][k] = (pFlip > pHold);
 
-            
                         maxChange = Math.max(maxChange, Math.abs(p[i][j][k] - oldProb));
                     }
                 }
             }
-        } while (maxChange >= epsilon); //Continues until changes are below the threshold
+        } while (maxChange >= epsilon); // Continues until changes are below the threshold
     }
 
     /**
@@ -76,12 +74,12 @@ public class PigSolver {
      * @return Probability of winning from the given state
      */
     public double pWin(int i, int j, int k) {
-        if (i + k >= goal) 
+        if (i + k >= goal)
             return 1.0;
-        else if (j >= goal) 
+        else if (j >= goal)
             return 0.0;
         else
-            return p[i][j][k]; 
+            return p[i][j][k];
     }
 
     /**
@@ -92,26 +90,31 @@ public class PigSolver {
         for (int i = 0; i < goal; i++) {
             for (int j = 0; j < goal; j++) {
                 int k = 0;
-                //Finds the first turn total where holding is better than rolling
+                // Finds the first turn total where holding is better than rolling
                 while (k < goal - i && flip[i][j][k])
                     k++;
-                System.out.print(k + " "); 
+                System.out.print(k + " ");
             }
             System.out.println();
         }
     }
 
-   
     public static void main(String[] args) {
         PigSolver solver = new PigSolver(100, 1e-9);
 
-        //Computes the probability of winning at the start of the game
+        // Computes the probability of winning at the start of the game
         double startProb = solver.pWin(0, 0, 0);
 
-        
         System.out.printf("Win probability at start: %.6f%n", startProb);
 
-        //Output the hold values table
-        //solver.outputHoldValues();
+        // Output the hold values table
+        // solver.outputHoldValues();
+
+        // When either players should hold
+        int k = 0;
+        while (k < solver.goal && solver.flip[0][0][k])
+            k++;
+        System.out.printf("First-turn hold threshold: %d%n", k);
+
     }
 }
